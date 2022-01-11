@@ -1,8 +1,8 @@
 version: "3.6"
 
 services:
-  compress-image:
-    container_name: compress-image
+  batch-server:
+    container_name: batch-server
     build: .
     volumes:
       - $HOME/.aws/:/root/.aws/
