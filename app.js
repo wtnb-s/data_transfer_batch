@@ -1,41 +1,24 @@
-const Mysql = require('./Task/mysql');
-const Database = require('./Task/config/database');
+const Mysql = require('./src/mysql');
+const Database = require('./src/config/database');
 
 exports.lambdaHandler = async (event) => {
   const mysqlOld = new Mysql();
+  const mysqlNew = new Mysql();
   await mysqlOld.connect(Database.old);
-  [data] = await mysqlOld.query('SELECT name, status FROM dumy limit 3;');
-  console.log(data);
+  await mysqlNew.connect(Database.new);
+
+  let sql = `SELECT name, status FROM dumy limit 5;`;
+  let [data] = await mysqlOld.query(sql);
+
+  for (value of data) {
+    //await mysqlNew.query('replace into dumy set ?;', value);
+  }
+  [data] = await mysqlNew.query(sql);
+
+  var check = data.some((value) => value['name'] === 'pp');
+  console.log(check);
+
   await mysqlOld.end();
-
-  // const connection_old = await mysql.createConnection(db_config_old);
-  // const connection_new = await mysql.createConnection(db_config_new);
-
-  // let sql = 'SELECT name, status FROM dumy';
-  // let data = await db_select(connection_old, sql);
-  // for (value of data) {
-  //   console.log(value);
-  //   //await db_insert(connection_new, 'dumy', value);
-  // }
-
-  // sql = 'SELECT * FROM dumy';
-  // data = await db_select(connection_new, sql);
-  // console.log(data);
-
-  // connection_old.end();
-  // connection_new.end();
+  await mysqlNew.end();
   return { statusCode: 200, body: JSON.stringify('Hello from Lambda!') };
 };
-
-// // データ追加
-// async function db_insert(connect, tablename, data) {
-//   let sql = 'insert into ' + tablename + ' set ?';
-//   const [rows] = await connect.query(sql, data);
-//   return rows.insertId;
-// }
-
-// // データ参照
-// async function db_select(connect, sql) {
-//   const [results, field] = await connect.execute(sql);
-//   return results;
-// }
