@@ -7,18 +7,24 @@ exports.lambdaHandler = async (event) => {
   await mysqlOld.connect(Database.old);
   await mysqlNew.connect(Database.new);
 
-  let sql = `SELECT name, status FROM dumy limit 5;`;
+  let sql = `SELECT id, name, type FROM test;`;
   let [data] = await mysqlOld.query(sql);
 
+  let save = [];
   for (value of data) {
-    //await mysqlNew.query('replace into dumy set ?;', value);
+    value['type'] = 9;
+    value['sort'] = null;
+    value['id'] = value['id'] + 1000;
+    save.push(value);
+    // Object.value(value)
   }
-  [data] = await mysqlNew.query(sql);
 
-  var check = data.some((value) => value['name'] === 'pp');
-  console.log(check);
+  console.log(save.map((item) => [item.id, item.name, item.type, item.sort, item.created_at, item.updated_at]));
+  await mysqlNew.query('REPLACE INTO test (id, name, type, sort, created_at, updated_at) VALUES ?;', [
+    save.map((item) => [item.id, item.name, item.type, item.sort, item.created_at, item.updated_at]),
+  ]);
 
   await mysqlOld.end();
   await mysqlNew.end();
-  return { statusCode: 200, body: JSON.stringify('Hello from Lambda!') };
+  return { statusCode: 200, body: JSON.stringify('done') };
 };

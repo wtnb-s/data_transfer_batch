@@ -10,12 +10,51 @@ services:
     ports:
       - "9000:8080"
     networks:
-      - laravel_sail
-      - docker_lamp_2_default
+      - data-transfer
     env_file:
       - .env.local
+
+  mysql1:
+    image: 'mysql/mysql-server:8.0'
+    container_name: 'mysql1'
+    ports:
+      - '13306:3306'
+    environment:
+      MYSQL_ROOT_PASSWORD: 'secret'
+      MYSQL_ROOT_HOST: "%"
+      MYSQL_DATABASE: 'test'
+      MYSQL_USER: 'test-user'
+      MYSQL_PASSWORD: 'secret'
+      MYSQL_ALLOW_EMPTY_PASSWORD: 1
+    networks:
+      - data-transfer
+    volumes:
+      - 'data-transfer-batch_dbstore1:/var/lib/mysql'
+
+  mysql2:
+    image: 'mysql/mysql-server:8.0'
+    container_name: 'mysql2'
+    ports:
+        - '23306:3306'
+    environment:
+      MYSQL_ROOT_PASSWORD: 'secret'
+      MYSQL_ROOT_HOST: "%"
+      MYSQL_DATABASE: 'test'
+      MYSQL_USER: 'test-user'
+      MYSQL_PASSWORD: 'secret'
+      MYSQL_ALLOW_EMPTY_PASSWORD: 1
+    networks:
+      - data-transfer
+    volumes:
+      - 'data-transfer-batch_dbstore2:/var/lib/mysql'
+
 networks:
-  laravel_sail:
-    external: true
-  docker_lamp_2_default:
-    external: true
+  data-transfer:
+    name: data-transfer
+    driver: bridge
+
+volumes:
+  data-transfer-batch_dbstore1:
+    driver: local
+  data-transfer-batch_dbstore2:
+    driver: local
